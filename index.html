@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tena24 – Hyper, Enterprise, Expanse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e8e8;
+    --muted: #666;
+    --green: #4ade80;
+    --green-dim: rgba(74,222,128,0.12);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.10);
+    --yellow: #fbbf24;
+    --yellow-dim: rgba(251,191,36,0.10);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,0.10);
+    --accent: #96BF48;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+  }
+  header {
+    padding: 32px 40px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+  .logo-area img { max-width: 160px; display: block; }
+  .logo-area p { color: var(--muted); font-size: 14px; margin-top: 6px; font-family: 'DM Mono', monospace; }
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .filter-group { display: flex; gap: 6px; align-items: center; }
+  .filter-label { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; }
+  select, input[type="search"] {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 7px 12px; border-radius: 6px; font-family: 'DM Mono', monospace;
+    font-size: 13px; outline: none; cursor: pointer; transition: border-color 0.15s;
+  }
+  select:focus, input:focus { border-color: var(--accent); }
+  input[type="search"] { width: 200px; }
+
+  .legend {
+    padding: 12px 40px; display: flex; gap: 20px;
+    border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+  .dot-theme { background: var(--green); }
+  .dot-shopify { background: var(--blue); }
+  .dot-app { background: var(--yellow); }
+  .dot-custom { background: var(--red); }
+
+  .wrapper { overflow-x: auto; padding: 0 40px 40px; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 900px; }
+  thead { position: sticky; top: 0; z-index: 50; }
+
+  thead tr:first-child th {
+    background: var(--surface); padding: 10px 12px 6px;
+    text-align: center; font-size: 13px; font-weight: 700; color: var(--text);
+    letter-spacing: 0.05em; border-bottom: none;
+  }
+  thead tr:first-child th:nth-child(-n+4) { text-align: left; }
+
+  .theme-header-cell { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .theme-name { font-size: 13px; font-weight: 700; white-space: nowrap; }
+  .theme-price {
+    font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted);
+    background: var(--surface2); padding: 2px 6px; border-radius: 3px; white-space: nowrap;
+  }
+  .theme-price.free { color: var(--green); }
+  .theme-link { font-size: 11px; color: var(--accent); text-decoration: none; font-family: 'DM Mono', monospace; }
+  .theme-link:hover { text-decoration: underline; }
+
+  thead tr:last-child th {
+    background: var(--surface); padding: 4px 0 10px;
+    text-align: center; border-bottom: 2px solid var(--border);
+  }
+
+  th:nth-child(1), td:nth-child(1) { min-width: 120px; max-width: 120px; }
+  th:nth-child(2), td:nth-child(2) { min-width: 120px; max-width: 120px; }
+  th:nth-child(3), td:nth-child(3) { min-width: 220px; }
+  th:nth-child(4), td:nth-child(4) { min-width: 100px; max-width: 100px; }
+  th:nth-child(n+5), td:nth-child(n+5) { min-width: 110px; max-width: 130px; }
+
+  tr.page-group td {
+    background: var(--surface2); padding: 10px 12px 8px;
+    font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--accent); border-bottom: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+  }
+  tr.section-group td {
+    background: var(--surface); padding: 8px 12px; font-size: 13px;
+    font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  tr.data-row:hover td { background: rgba(255,255,255,0.025) !important; }
+  tr.data-row td {
+    padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle;
+  }
+  td.feature-cell { color: var(--text); font-size: 14px; line-height: 1.4; }
+  td.priority-cell { font-family: 'DM Mono', monospace; font-size: 12px; text-align: center; }
+  .priority-must { background: rgba(248,113,113,0.15); color: var(--red); padding: 2px 7px; border-radius: 4px; white-space: nowrap; display: inline-block; }
+  .priority-could { background: rgba(251,191,36,0.15); color: var(--yellow); padding: 2px 7px; border-radius: 4px; white-space: nowrap; display: inline-block; }
+
+  td.theme-cell { text-align: center; padding: 6px 8px; }
+  .cell-inner { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .yn-badge {
+    font-size: 12px; font-weight: 700; font-family: 'DM Mono', monospace;
+    padding: 2px 8px; border-radius: 4px; letter-spacing: 0.03em; white-space: nowrap;
+  }
+  .yes-theme   { background: var(--green-dim); color: var(--green); }
+  .yes-shopify { background: var(--blue-dim);  color: var(--blue); }
+  .yes-app     { background: var(--yellow-dim);color: var(--yellow); }
+  .no-app      { background: var(--yellow-dim);color: var(--yellow); opacity: 0.75; }
+  .no-custom   { background: var(--red-dim);   color: var(--red); }
+  .no-none     { background: rgba(255,255,255,0.05); color: var(--muted); }
+
+  td.page-cell, td.section-cell { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; vertical-align: top; padding-top: 10px; }
+
+  .score-bar { height: 3px; border-radius: 2px; margin-top: 4px; background: var(--border); position: relative; width: 60px; }
+  .score-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+  .score-pct { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
+  .stat-chips { display: flex; gap: 4px; align-items: center; justify-content: center; }
+  .stat-chip { font-size: 11px; font-family: 'DM Mono', monospace; padding: 1px 4px; border-radius: 3px; white-space: nowrap; }
+
+  .no-results { padding: 60px; text-align: center; color: var(--muted); font-family: 'DM Mono', monospace; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <img src="https://cdn.prod.website-files.com/68a42ed7e787a4a306819ed6/690a41b3472c531801eacf5d_2e76b2c5c352ef09207d32ed7974b8ad_wecanfly-logo.svg" alt="Logo">
+    <p id="subtitle">Loading…</p>
+  </div>
+  <div class="controls">
+    <div class="filter-group">
+      <span class="filter-label">Page</span>
+      <select id="pageFilter"><option value="">All pages</option></select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Show</span>
+      <select id="supportFilter">
+        <option value="">All features</option>
+        <option value="needs-app">Needs 3rd party app</option>
+        <option value="needs-custom">Needs custom code</option>
+        <option value="native">Native (Theme/Shopify)</option>
+        <option value="must-have">Must have only</option>
+      </select>
+    </div>
+    <input type="search" id="search" placeholder="Search features…">
+  </div>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><span class="dot dot-theme"></span> Theme — built-in, no extras needed</div>
+  <div class="legend-item"><span class="dot dot-shopify"></span> Shopify — native platform feature</div>
+  <div class="legend-item"><span class="dot dot-app"></span> App — requires 3rd party app</div>
+  <div class="legend-item"><span class="dot dot-custom"></span> Custom code — requires development</div>
+</div>
+
+<div class="wrapper">
+  <table id="mainTable">
+    <thead style="top: 0px;">
+      <tr id="themeHeaders"><th>Page</th><th>Section</th><th>Feature</th><th>Priority</th></tr>
+      <tr id="scoreHeaders"></tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <div class="no-results" id="noResults" style="display:none">No features match the current filters.</div>
+</div>
+
+<script>
+const DATA = {"themes": ["1. Hyper", "2. Enterprise", "3. Expanse"], "prices": {"1. Hyper": "$400", "2. Enterprise": "$400", "3. Expanse": "$420"}, "urls": {"1. Hyper": "https://themes.shopify.com/themes/hyper", "2. Enterprise": "https://themes.shopify.com/themes/enterprise", "3. Expanse": "https://themes.shopify.com/themes/expanse"}, "rows": [{"page": "Globalne / Nagłówek", "section": "Menu", "feature": "Mega menu z kategoriami i promo", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Globalne / Nagłówek", "section": "Menu", "feature": "Pasek ogłoszeń: info o refundacji NFZ", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Globalne / Nagłówek", "section": "Menu", "feature": "Selektor / quiz / konfigurator doboru produktu", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "App"}, "2. Enterprise": {"yn": "No", "src": "App"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Globalne / Nagłówek", "section": "Menu", "feature": "Koszyk (drawer) i login w nagłówku", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Globalne / Nagłówek", "section": "Wyszukiwarka", "feature": "Autouzupełnianie (predictive search)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Globalne / Nagłówek", "section": "Wyszukiwarka", "feature": "Podpowiedzi: kategorie, popularne produkty, treści poradnika", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Globalne / Nagłówek", "section": "Wyszukiwarka", "feature": "Synonimy i odmiany językowe", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Globalne / Nagłówek", "section": "Wyszukiwarka", "feature": "Wyszukiwanie semantyczne (AI Search)", "priority": "Could have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Globalne / Nagłówek", "section": "Wyszukiwarka", "feature": "Wyszukiwanie obrazem", "priority": "Could have", "themes": {"1. Hyper": {"yn": "No", "src": "App"}, "2. Enterprise": {"yn": "No", "src": "App"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Globalne / Nagłówek", "section": "Wyszukiwarka", "feature": "Zero-results: podpowiedzi podobnych produktów", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "App"}, "2. Enterprise": {"yn": "No", "src": "App"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Strona główna", "section": "Hero", "feature": "Hero / slider z CTA", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Strona główna", "section": "Produkty", "feature": "Wyróżnione kategorie produktowe", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Strona główna", "section": "Produkty", "feature": "Karuzele: Nowości, Bestsellery, grupy produktowe", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Strona główna", "section": "Produkty", "feature": "Karuzele produktów przełączane zakładkami (jak Seni24)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Strona główna", "section": "Produkty", "feature": "Ostatnio przeglądane", "priority": "Could have", "themes": {"1. Hyper": {"yn": "No", "src": "Custom code"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Strona główna", "section": "Edukacja", "feature": "Sekcja bloga / poradnika", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Strona główna", "section": "Edukacja", "feature": "Refundacja – co, jak, krok po kroku (sekcja how-it-works)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Strona główna", "section": "Social proof / Trust", "feature": "Etykieta „To jest wyrób medyczny…”", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Strona główna", "section": "Social proof / Trust", "feature": "Opinie klientów", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "App"}, "2. Enterprise": {"yn": "No", "src": "App"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Strona główna", "section": "Social proof / Trust", "feature": "Ikony Trust & Reassurance", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Strona główna", "section": "Social proof / Trust", "feature": "FAQ – akordeon", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Strona główna", "section": "Stopka", "feature": "Newsletter", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Strona główna", "section": "Stopka", "feature": "Metody dostawy i płatności (ikony)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Strona główna", "section": "Stopka", "feature": "Nota prawna Essity / producent", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Listing (PLP)", "section": "Nagłówek", "feature": "Nagłówek z tekstem SEO", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Listing (PLP)", "section": "Nagłówek", "feature": "Baner „Sprawdź jak działa zakup z refundacją NFZ”", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Listing (PLP)", "section": "Filtry", "feature": "Filtry: stopień nietrzymania, chłonność, płeć, rozmiar, mobilność, pora, refundacja, cena, typ", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Listing (PLP)", "section": "Filtry", "feature": "Filtry w sidebarze + sortowanie", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Listing (PLP)", "section": "Filtry", "feature": "Breadcrumbs", "priority": "Could have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Listing (PLP)", "section": "Kafelek", "feature": "Tagi/badge: Nowość, Polska marka, NFZ", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Listing (PLP)", "section": "Kafelek", "feature": "Ikona chłonności (kropelki) na kafelku", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "Custom code"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Listing (PLP)", "section": "Kafelek", "feature": "Każdy wariant jako osobny produkt na liście", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Listing (PLP)", "section": "Kafelek", "feature": "Porównywarka produktów (chłonność, rozmiar)", "priority": "Could have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Listing (PLP)", "section": "Kafelek", "feature": "Wyłączenie quick buy", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Listing (PLP)", "section": "Merchandising", "feature": "Baner refundacji wpleciony w grid produktów", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "Custom code"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Listing (PLP)", "section": "Merchandising", "feature": "Cross-sell dla wybranych kategorii", "priority": "Could have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Listing (PLP)", "section": "Merchandising", "feature": "FAQ + tekst SEO pod listingiem", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Karta produktu (PDP)", "section": "Galeria", "feature": "Zdjęcia / wideo + zoom", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Kod produktu (SKU)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Omnibus – najniższa cena z 30 dni", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "App"}, "2. Enterprise": {"yn": "No", "src": "App"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Ocena produktu (gwiazdki)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "App"}, "2. Enterprise": {"yn": "No", "src": "App"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Liczba produktów na stanie (stock counter)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Tabela rozmiarów", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Cena za sztukę (unit price)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Warianty paczkowe (10 szt. / 6×10 szt.)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Rabaty ilościowe (volume pricing)", "priority": "Could have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Zapytaj o produkt (formularz)", "priority": "Could have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Lista zakupowa / wishlist", "priority": "Could have", "themes": {"1. Hyper": {"yn": "No", "src": "App"}, "2. Enterprise": {"yn": "No", "src": "App"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Powiadomienia o dostępności (back in stock)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Info: dostawa od, darmowa dostawa od, wysyłka 24/48h, zwroty", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Dwa CTA: zakup z refundacją / bez refundacji", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "Custom code"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Cena standardowa vs cena z refundacją", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "Custom code"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Karta produktu (PDP)", "section": "Buy section", "feature": "Subskrypcja (tylko produkty OTC)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Karta produktu (PDP)", "section": "Szczegóły", "feature": "Opis, cechy, dostawa i zwroty w akordeonach", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Karta produktu (PDP)", "section": "Szczegóły", "feature": "Zakładki: Opis / Cechy / Opinie / Pytania / Dostawa", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Karta produktu (PDP)", "section": "Szczegóły", "feature": "Certyfikaty / dokumenty produktu (metafields)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Karta produktu (PDP)", "section": "Szczegóły", "feature": "Etykieta wyrób medyczny na PDP", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Karta produktu (PDP)", "section": "Up/Cross sell", "feature": "Podobne produkty", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Karta produktu (PDP)", "section": "Up/Cross sell", "feature": "Uzupełnij zestaw (complementary)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Karta produktu (PDP)", "section": "Up/Cross sell", "feature": "Zestawy produktowe (bundles)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Karta produktu (PDP)", "section": "Help / SEO", "feature": "Q&A do produktu", "priority": "Could have", "themes": {"1. Hyper": {"yn": "No", "src": "App"}, "2. Enterprise": {"yn": "No", "src": "App"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Karta produktu (PDP)", "section": "Help / SEO", "feature": "Bezpłatne próbki", "priority": "Could have", "themes": {"1. Hyper": {"yn": "No", "src": "App"}, "2. Enterprise": {"yn": "No", "src": "App"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Koszyk", "section": "Lista produktów", "feature": "Nazwa, cena, liczba, wartość, usuń", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Koszyk", "section": "Lista produktów", "feature": "Rozdzielenie pozycji refundowanych i komercyjnych", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "Custom code"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Koszyk", "section": "Podsumowanie", "feature": "Koszt produktów, dostawy, kod rabatowy", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Koszyk", "section": "Podsumowanie", "feature": "Pasek progu darmowej dostawy", "priority": "Could have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Koszyk", "section": "Up/Cross sell", "feature": "Produkty uzupełniające w koszyku", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "Yes", "src": "Theme"}, "3. Expanse": {"yn": "Yes", "src": "Theme"}}}, {"page": "Koszyk", "section": "Up/Cross sell", "feature": "Szybkie ponowne zamówienie (quick order list)", "priority": "Could have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Theme"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Koszyk", "section": "Checkout", "feature": "Zakup bez rejestracji konta", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Moduł refundacji NFZ", "section": "Zlecenie", "feature": "Zapamiętanie numeru zlecenia", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "Custom code"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Moduł refundacji NFZ", "section": "Limit", "feature": "Widoczny limit (sztukowy/wartościowy) przy wyborze ilości", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "Custom code"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Moduł refundacji NFZ", "section": "Limit", "feature": "Ostrzeżenia przy zbliżaniu się / przekroczeniu limitu", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "Custom code"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Moduł refundacji NFZ", "section": "Realizacja", "feature": "Wybór: cyklicznie co miesiąc vs jednorazowo (maks. 6 mies.)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "Custom code"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Moduł refundacji NFZ", "section": "Weryfikacja", "feature": "Zgodność produktu z kodem zlecenia (np. Y0601)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "Custom code"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Moduł refundacji NFZ", "section": "Cena", "feature": "Wyliczenie ceny wg pliku UMX i poziomu refundacji (80/90/100%)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "Custom code"}, "2. Enterprise": {"yn": "No", "src": "Custom code"}, "3. Expanse": {"yn": "No", "src": "Custom code"}}}, {"page": "Moduł refundacji NFZ", "section": "Komunikacja", "feature": "Przypomnienie o kończącym się zleceniu", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "App"}, "2. Enterprise": {"yn": "No", "src": "App"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Moduł refundacji NFZ", "section": "Integracje", "feature": "Integracja z Baselinkerem (Targmed)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "No", "src": "App"}, "2. Enterprise": {"yn": "No", "src": "App"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Konto klienta", "section": "Konto", "feature": "Historia zakupów, zapamiętane adresy (główny, rozliczeniowy)", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Konto klienta", "section": "Konto", "feature": "Rejestracja przez social media", "priority": "Could have", "themes": {"1. Hyper": {"yn": "No", "src": "App"}, "2. Enterprise": {"yn": "No", "src": "App"}, "3. Expanse": {"yn": "No", "src": "App"}}}, {"page": "Konto klienta", "section": "Konto", "feature": "Logowanie e-mail + hasło", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Konto klienta", "section": "Subskrypcje", "feature": "Zarządzanie subskrypcją: pauza, anulowanie, zmiana adresu", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Konto klienta", "section": "Zgody", "feature": "Zarządzanie zgodami marketingowymi", "priority": "Must have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}, {"page": "Konto klienta", "section": "Wsparcie", "feature": "Szybka pomoc / czat", "priority": "Could have", "themes": {"1. Hyper": {"yn": "Yes", "src": "Shopify"}, "2. Enterprise": {"yn": "Yes", "src": "Shopify"}, "3. Expanse": {"yn": "Yes", "src": "Shopify"}}}]};
+
+const themes = DATA.themes;
+const prices = DATA.prices;
+const urls   = DATA.urls || {};
+const rows   = DATA.rows;
+
+// Subtitle
+const pages = [...new Set(rows.map(r => r.page).filter(Boolean))];
+document.getElementById('subtitle').innerHTML =
+  `<span style="color:#fff">Shopify Theme Compatibility Matrix</span> <span style="color:#666">${rows.length} features · ${pages.length} pages · ${themes.length} themes</span>`;
+
+// Page filter options
+const pf = document.getElementById('pageFilter');
+pages.forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p; pf.appendChild(o); });
+
+// Theme header row
+const thRow = document.getElementById('themeHeaders');
+themes.forEach(t => {
+  const th = document.createElement('th');
+  const isFree = (prices[t] || '').toLowerCase() === 'free';
+  const link = urls[t] ? `<a class="theme-link" href="${urls[t]}" target="_blank">↗ view</a>` : '';
+  th.innerHTML = `<div class="theme-header-cell">
+    <span class="theme-name">${t}</span>
+    <span class="theme-price${isFree?' free':''}">${prices[t] || ''}</span>
+    ${link}
+  </div>`;
+  thRow.appendChild(th);
+});
+
+function getCellClass(yn, src) {
+  if (yn === 'Yes') {
+    if (src === 'Theme') return 'yes-theme';
+    if (src === 'Shopify') return 'yes-shopify';
+    if (src === 'App') return 'yes-app';
+    return 'yes-theme';
+  }
+  if (src === 'App') return 'no-app';
+  if (src === 'Custom code') return 'no-custom';
+  return 'no-none';
+}
+
+function getCellLabel(yn, src) {
+  if (yn === 'Yes') return src || 'Yes';
+  if (!src) return '—';
+  return src;
+}
+
+function buildScoreRow(filteredRows) {
+  const sr = document.getElementById('scoreHeaders');
+  sr.innerHTML = '';
+  for (let i = 0; i < 4; i++) sr.appendChild(document.createElement('th'));
+  themes.forEach(t => {
+    const th = document.createElement('th');
+    const total  = filteredRows.filter(r => r.themes[t]).length;
+    const native = filteredRows.filter(r => {
+      const d = r.themes[t]; if (!d) return false;
+      return d.yn === 'Yes' && (d.src === 'Theme' || d.src === 'Shopify');
+    }).length;
+    const pct = total > 0 ? Math.round(native / total * 100) : 0;
+    th.innerHTML = `<div style="display:flex;align-items:center;gap:6px;justify-content:center;"><div class="stat-chips"><span class="stat-chip yes-theme">${native}/${total}</span></div><div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div></div>
+      <div class="score-pct">${pct}% native</div>`;
+    sr.appendChild(th);
+  });
+}
+
+function renderTable() {
+  const pageVal    = document.getElementById('pageFilter').value;
+  const supportVal = document.getElementById('supportFilter').value;
+  const searchVal  = document.getElementById('search').value.toLowerCase();
+
+  let filtered = rows.filter(r => {
+    if (pageVal && r.page !== pageVal) return false;
+    if (searchVal && !r.feature.toLowerCase().includes(searchVal) &&
+        !r.section.toLowerCase().includes(searchVal)) return false;
+    if (supportVal === 'needs-app')    return themes.some(t => r.themes[t] && r.themes[t].src === 'App');
+    if (supportVal === 'needs-custom') return themes.some(t => r.themes[t] && r.themes[t].src === 'Custom code');
+    if (supportVal === 'native')       return themes.every(t => !r.themes[t] || r.themes[t].yn !== 'Yes' || r.themes[t].src === 'Theme' || r.themes[t].src === 'Shopify');
+    if (supportVal === 'must-have')    return r.priority === 'Must have';
+    return true;
+  });
+
+  buildScoreRow(filtered);
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  document.getElementById('noResults').style.display = filtered.length === 0 ? 'block' : 'none';
+  if (filtered.length === 0) return;
+
+  let lastPage = null, lastSection = null;
+  filtered.forEach(row => {
+    if (row.page !== lastPage) {
+      lastPage = row.page; lastSection = null;
+      const tr = document.createElement('tr'); tr.className = 'page-group';
+      const td = document.createElement('td'); td.colSpan = 4 + themes.length;
+      td.textContent = '▸ ' + (row.page || '');
+      tr.appendChild(td); tbody.appendChild(tr);
+    }
+    if (row.section !== lastSection && row.section) {
+      lastSection = row.section;
+      const tr = document.createElement('tr'); tr.className = 'section-group';
+      const td = document.createElement('td'); td.colSpan = 4 + themes.length;
+      td.textContent = row.section;
+      tr.appendChild(td); tbody.appendChild(tr);
+    }
+    const tr = document.createElement('tr'); tr.className = 'data-row';
+    const priority = row.priority === 'Must have'
+      ? '<span class="priority-must">Must have</span>'
+      : row.priority === 'Could have'
+      ? '<span class="priority-could">Could have</span>'
+      : '';
+    tr.innerHTML = `<td class="page-cell"></td><td class="section-cell"></td>
+      <td class="feature-cell">${row.feature}</td>
+      <td class="priority-cell">${priority}</td>`;
+    themes.forEach(t => {
+      const d = row.themes[t] || {yn: '-', src: ''};
+      const td = document.createElement('td'); td.className = 'theme-cell';
+      td.innerHTML = `<div class="cell-inner"><span class="yn-badge ${getCellClass(d.yn, d.src)}">${getCellLabel(d.yn, d.src)}</span></div>`;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('pageFilter').addEventListener('change', renderTable);
+document.getElementById('supportFilter').addEventListener('change', renderTable);
+document.getElementById('search').addEventListener('input', renderTable);
+renderTable();
+
+
+</script>
+</body>
+</html>
